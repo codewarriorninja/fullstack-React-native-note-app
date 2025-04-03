@@ -1,4 +1,4 @@
-import { View, Text,StyleSheet,TouchableOpacity,ActivityIndicator } from 'react-native'
+import { View, Text,StyleSheet,TouchableOpacity,ActivityIndicator, Alert } from 'react-native'
 import React, { useState,useEffect } from 'react'
 import NoteList from '../../components/NoteList';
 import AddNoteModal from '../../components/AddNoteModal';
@@ -12,7 +12,7 @@ const NotePage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() =>{
+    useEffect(() => {
      fetchNotes();
     },[]);
 
@@ -41,6 +41,28 @@ const NotePage = () => {
     setModalVisible(false);
    }
 
+   //delete note
+   const deleteNote = async(id) =>{
+    Alert.alert('Delete Note', 'Are you sure you want to delete this note',[
+      {
+        text:'Cancel',
+        style:'cancel'
+      },
+      {
+        text:'Delete',
+        style:'destructive',
+        onPress: async() => {
+          const response = await noteService.deleteNote(id);
+          if(response.error){
+            Alert.alert('Error', response.error);
+          }else{
+            setNotes(notes.filter((note) => note.$id !== id));
+          }
+        }
+      }
+    ])
+   }
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -48,7 +70,7 @@ const NotePage = () => {
       ) : (
         <>
         {error && <Text style={styles.errorText}>Error: {error}</Text>}
-        <NoteList notes={notes}/>
+        <NoteList notes={notes} onDelete={deleteNote}/>
         </>
       )}
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
