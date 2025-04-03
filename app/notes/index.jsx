@@ -58,10 +58,30 @@ const NotePage = () => {
           }else{
             setNotes(notes.filter((note) => note.$id !== id));
           }
-        }
-      }
-    ])
-   }
+        },
+      },
+    ]);
+   };
+
+   //Edit Note
+   const editNote = async (id, newText) => {
+    if (!newText.trim()) {
+      Alert.alert('Error', 'Note text cannot be empty');
+      return;
+    }
+
+    const response = await noteService.updateNote(id, newText);
+    if (response.error) {
+      Alert.alert('Error', response.error);
+    } else {
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.$id === id ? { ...note, text: response.data.text } : note
+        )
+      );
+    }
+  };
+
 
   return (
     <View style={styles.container}>
@@ -70,7 +90,7 @@ const NotePage = () => {
       ) : (
         <>
         {error && <Text style={styles.errorText}>Error: {error}</Text>}
-        <NoteList notes={notes} onDelete={deleteNote}/>
+        <NoteList notes={notes} onDelete={deleteNote} onEdit={editNote}/>
         </>
       )}
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
