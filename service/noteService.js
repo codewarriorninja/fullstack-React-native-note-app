@@ -15,8 +15,9 @@ const noteService = {
         }
         return {data: response}
     },
+    
     //add Note
-    async addNote(text){
+    async addNotes(text){
         if(!text){
             return { error: 'Note text cannot be empty'}
         }
@@ -29,7 +30,7 @@ const noteService = {
         if(response?.error){
             return {error: response.error}
         }
-         return {data: response}
+         return {data: response};
     }
 }
 

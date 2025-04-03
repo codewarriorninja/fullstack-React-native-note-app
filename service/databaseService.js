@@ -20,7 +20,6 @@ const databaseService = {
         return {error: error.message}; 
     }
    }
-
 };
 
 export default databaseService
