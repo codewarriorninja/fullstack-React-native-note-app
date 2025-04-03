@@ -1,5 +1,7 @@
-import { View, Text,StyleSheet,FlatList } from 'react-native'
+import { View, Text,StyleSheet,TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
+import NoteList from '../../components/NoteList';
+import AddNoteModal from '../../components/AddNoteModal';
 
 const NotePage = () => {
     const [notes, setNotes] = useState([
@@ -7,18 +9,27 @@ const NotePage = () => {
         {id:'2', text:'Note Two'},
         {id:'3', text:'Note Three'}
     ]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [newNote, setNewNote] = useState('');
+
+   const addNote = () => {
+    if(newNote.trim() === '') return;
+
+    setNotes((prevNotes) => [
+        ...prevNotes,
+        {id:Date.now.toString(), text:newNote},
+    ]);
+    setNewNote('');
+    setModalVisible(false);
+   }
 
   return (
     <View style={styles.container}>
-      <FlatList 
-       data={notes}
-       keyExtractor={(item) => item.id} 
-       renderItem={({item}) => (
-        <View style={styles.noteItems}>
-            <Text style={styles.noteText}>{item.text}</Text>
-        </View>
-       )}
-      />
+        <NoteList notes={notes}/>
+      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.addButtonText}>+Add Note</Text>
+      </TouchableOpacity>
+      <AddNoteModal modalVisible={modalVisible} setModalVisible={setModalVisible} newNote={newNote} setNewNote={setNewNote} addNote={addNote}/>
     </View>
   )
 }
@@ -29,17 +40,21 @@ const styles = StyleSheet.create({
     padding:20,
     backgroundColor:'#fff'
   },
-  noteItems:{
-    flexDirection:'row',
-    justifyContent:'space-between',
-    backgroundColor:'#f5f5f5',
+  addButton:{
+    position:'absolute',
+    left:20,
+    right:20,
+    bottom:20,
+    backgroundColor:'#007bff',
     padding:15,
-    borderRadius:5,
-    marginVertical:5,
+    borderRadius:8,
+    alignItems:'center'
   },
-  noteText:{
-    fontSize:18
-  }
+  addButtonText:{
+    color:'#fff',
+    fontSize:18,
+    fontWeight:'bold'
+  },
 })
 
 export default NotePage
