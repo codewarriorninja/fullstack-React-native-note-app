@@ -3,22 +3,36 @@ import React, { useState,useEffect } from 'react'
 import NoteList from '../../components/NoteList';
 import AddNoteModal from '../../components/AddNoteModal';
 import noteService from '../../service/noteService';
-
+import { useRouter } from 'expo-router';
+import { useAuth } from '../../context/authContext';
 
 const NotePage = () => {
+    const router = useRouter();
+    const {user, loading:authLoading} = useAuth();
+
     const [notes, setNotes] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [newNote, setNewNote] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    useEffect(() =>{
+      if(!authLoading && !user){
+        router.replace('/auth');
+      }
+    }, [user,authLoading]);
+
+
     useEffect(() => {
+      if(user){
+        fetchNotes();
+      }
      fetchNotes();
     },[]);
 
     const fetchNotes = async () =>{
       setLoading(true);
-      const response = await noteService.getNotes();
+      const response = await noteService.getNotes(user.$id);
       if(response.error){
         setError(response.error);
         setLoading(false);
@@ -29,9 +43,10 @@ const NotePage = () => {
       setError(null);
     }
 
+    //addNote
    const addNote = async() => {
     if(newNote.trim() === '') return;
-     const response = await noteService.addNotes(newNote);
+     const response = await noteService.addNotes(user.$id, newNote);
      if(response.error){
       setError(response.error);
       return;
@@ -90,7 +105,9 @@ const NotePage = () => {
       ) : (
         <>
         {error && <Text style={styles.errorText}>Error: {error}</Text>}
-        <NoteList notes={notes} onDelete={deleteNote} onEdit={editNote}/>
+        {notes.length === 0 ? (
+          <Text style={styles.noNotes}>You have no notes</Text>
+        ) : (<NoteList notes={notes} onDelete={deleteNote} onEdit={editNote}/>)}
         </>
       )}
       <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
@@ -132,6 +149,13 @@ const styles = StyleSheet.create({
     flex:1,
     alignContent:'center',
     justifyContent:'center'
+  },
+  noNotes:{
+    textAlign:'center',
+    fontSize:18,
+    fontWeight:'bold',
+    color:'#555',
+    marginTop:15,
   }
 })
 
